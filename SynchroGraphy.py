@@ -14,11 +14,11 @@ import datetime
 import re
 import codecs
 
-# ---------- Settings ----------
+# ---------- Setting ----------
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")
 
-# ---------- Derived Key ----------
+# ---------- Key ----------
 def derive_key(password, salt, length=32):
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
@@ -29,7 +29,7 @@ def derive_key(password, salt, length=32):
     )
     return kdf.derive(password.encode())
 
-# ---------- Algorithms ----------
+# ---------- Algo ----------
 def xor_encrypt_decrypt(text, key):
     return ''.join(chr(ord(c) ^ ord(key[i % len(key)])) for i, c in enumerate(text))
 
@@ -105,7 +105,7 @@ def triple_des_decrypt(text, key):
     cipher = DES3.new(key[:24].ljust(24, b'\0'), DES3.MODE_CBC, iv)
     return unpad(cipher.decrypt(raw[8:]), DES3.block_size).decode()
 
-# ---------- Password Strength ----------
+# ---------- password ----------
 def check_password_strength(password):
     if len(password) < 6:
         return "Weak"
@@ -116,18 +116,18 @@ def check_password_strength(password):
     else:
         return "Medium"
 
-# ---------- Encryption ----------
+# ---------- Crypto ----------
 def encrypt():
     text = input_text.get("0.0", "end").strip()
     password = key_entry.get().strip()
     encryption_type = encryption_type_var.get()
 
     if not text or not password:
-        messagebox.showwarning("Warning", "Enter text and key.")
+        messagebox.showwarning("Warning", "please enter input and key.")
         return
 
-    strength_label.configure(text=f"Password strength: {check_password_strength(password)}")
-    log_activity("Encryption performed")
+    strength_label.configure(text=f"Password Strength: {check_password_strength(password)}")
+    log_activity("Encryption completed.")
 
     try:
         output_text.delete("0.0", "end")
@@ -166,17 +166,17 @@ def encrypt():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-# ---------- Decryption ----------
+# ---------- Decr ----------
 def decrypt():
     data = input_text.get("0.0", "end").strip()
     password = key_entry.get().strip()
     encryption_type = encryption_type_var.get()
 
     if not data or not password:
-        messagebox.showwarning("Warning", "Enter text and key.")
+        messagebox.showwarning("Warning", "please enter input and key.")
         return
 
-    log_activity("Decryption performed")
+    log_activity("Decryption completed.")
 
     try:
         output_text.delete("0.0", "end")
@@ -191,7 +191,7 @@ def decrypt():
         elif encryption_type == "XOR":
             output_text.insert("end", xor_encrypt_decrypt(data, password))
         elif encryption_type in ["SHA-256", "SHA-1", "MD5"]:
-            output_text.insert("end", "Hash algorithms are one-way.")
+            output_text.insert("end", "one Way Algorithm.")
         elif encryption_type == "Base64":
             output_text.insert("end", base64_decrypt(data))
         elif encryption_type == "Hex":
@@ -207,7 +207,7 @@ def decrypt():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-# ---------- GUI Elements ----------
+# ---------- رابط گرافیکی ----------
 def toggle_theme():
     current = ctk.get_appearance_mode()
     ctk.set_appearance_mode("Light" if current == "Dark" else "Dark")
@@ -215,14 +215,14 @@ def toggle_theme():
 def copy_output():
     app.clipboard_clear()
     app.clipboard_append(output_text.get("0.0", "end").strip())
-    messagebox.showinfo("Copied", "Output text copied.")
-    log_activity("Output copied")
+    messagebox.showinfo("Copy", "Output Copied.")
+    log_activity("Output Copied")
 
 def clear_fields():
     key_entry.delete(0, "end")
     input_text.delete("0.0", "end")
     output_text.delete("0.0", "end")
-    log_activity("Fields cleared")
+    log_activity("clear")
 
 def save_to_file():
     content = output_text.get("0.0", "end").strip()
@@ -230,8 +230,8 @@ def save_to_file():
         filename = f"encrypted_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.txt"
         with open(filename, "w", encoding="utf-8") as f:
             f.write(content)
-        messagebox.showinfo("Saved", f"File {filename} saved.")
-        log_activity("Output saved")
+        messagebox.showinfo("Save", f"file {filename} Saved.")
+        log_activity("Save Output")
 
 def log_activity(msg):
     log_box.configure(state="normal")
@@ -239,12 +239,12 @@ def log_activity(msg):
     log_box.configure(state="disabled")
     log_box.see("end")
 
-# ---------- Create GUI ----------
+# ---------- ساخت GUI ----------
 app = ctk.CTk()
 app.title("💎 Synchro Security | Cryptography")
 app.geometry("800x900")
-app.iconbitmap("logo.ico")
-ctk.CTkLabel(app, text="💎 Synchro Security | Cryptography", font=ctk.CTkFont(size=24, weight="bold")).pack(pady=15)
+
+ctk.CTkLabel(app, text="💎 Synchro Security |  Cryptography", font=ctk.CTkFont(size=24, weight="bold")).pack(pady=15)
 
 key_entry = ctk.CTkEntry(app, placeholder_text="🔑 Encryption Key", width=600)
 key_entry.pack(pady=10)
@@ -252,7 +252,7 @@ key_entry.pack(pady=10)
 input_text = ctk.CTkTextbox(app, height=180, width=700)
 input_text.pack(pady=10)
 
-strength_label = ctk.CTkLabel(app, text="Password strength: Weak")
+strength_label = ctk.CTkLabel(app, text="Password Strength: Weak")
 strength_label.pack(pady=5)
 
 button_frame = ctk.CTkFrame(app)
@@ -265,10 +265,18 @@ ctk.CTkButton(button_frame, text="📋 Copy Output", command=copy_output).grid(r
 ctk.CTkButton(button_frame, text="🗑 Clear", command=clear_fields).grid(row=0, column=4, padx=10)
 ctk.CTkButton(button_frame, text="💾 Save", command=save_to_file).grid(row=0, column=5, padx=10)
 
+encryption_type_var = ctk.StringVar(value="AES")
+ctk.CTkLabel(app, text="Method:").pack(pady=10)
+ctk.CTkOptionMenu(app, variable=encryption_type_var, values=[
+    "AES", "XOR", "SHA-256", "SHA-1", "MD5", "Base64", "Hex", "Caesar",
+    "ROT13", "Fernet", "Blowfish", "TripleDES"
+]).pack(pady=10)
+
 output_text = ctk.CTkTextbox(app, height=180, width=700)
 output_text.pack(pady=10)
 
-log_box = ctk.CTkTextbox(app, height=5, width=700, state="disabled")
-log_box.pack(pady=10)
+ctk.CTkLabel(app, text="📜Logs:").pack(pady=5)
+log_box = ctk.CTkTextbox(app, height=120, width=700, state="disabled")
+log_box.pack(pady=5)
 
 app.mainloop()
